@@ -5,13 +5,13 @@ const Hand = require('pokersolver').Hand;
 
 const Game = function (name, host) {
   this.deck = new Deck();
-  this.host = host;
-  this.players = [];
+  this.host = host; //
+  this.players = []; // 
   this.status = 0;
   this.cardsPerPlayer = 2;
   this.currentlyPlayed = 0;
   this.gameWinner = null;
-  this.gameName = name;
+  this.gameName = name; //
   this.roundNum = 0;
   this.roundData = {
     dealer: 0,
@@ -31,7 +31,24 @@ const Game = function (name, host) {
   this.smallBlind = 1;
   this.bigBlind = 2;
 
-  const constructor = (function () {})(this);
+  this.actionTimer = null;
+  this.secondsToPlay = 10;
+  this.autoMove = (socket) => {
+    const currentTopBet = this.getCurrentTopBet();
+    if (currentTopBet == 0 || !this.bigBlindWent) {
+      // this.check(socket);
+      console.log('this player would check');
+    }
+    else {
+      // this.fold(socket);
+      console.log('this player would fold');
+    }
+  };
+  this.actionTimerCountdown = function () {
+    this.actionTimer = setTimeout(this.autoMove, this.secondsToPlay * 1000);
+  };
+
+  const constructor = (function () { })(this);
 
   this.log = () => {
     if (this.debug) {
@@ -300,6 +317,7 @@ const Game = function (name, host) {
   };
 
   this.moveOntoNextPlayer = () => {
+    if (this.actionTimer != null) { clearTimeout(this.actionTimer) }
     let handOver = false;
     if (this.isStageComplete()) {
       this.log('stage complete');
@@ -336,12 +354,15 @@ const Game = function (name, host) {
           this.community.push(this.deck.dealRandomCard());
           this.community.push(this.deck.dealRandomCard());
           this.updateStage();
+          this.actionTimerCountdown();
         } else if (this.roundData.bets.length == 2) {
           this.community.push(this.deck.dealRandomCard());
           this.updateStage();
+          this.actionTimerCountdown();
         } else if (this.roundData.bets.length == 3) {
           this.community.push(this.deck.dealRandomCard());
           this.updateStage();
+          this.actionTimerCountdown();
         } else if (this.roundData.bets.length == 4) {
           handOver = true;
           const roundResults = this.evaluateWinners();
@@ -365,6 +386,7 @@ const Game = function (name, host) {
         this.endHandAllFold(nonFolderPlayer.getUsername());
         handOver = true;
       } else {
+        this.actionTimerCountdown();
         let currTurnIndex = 0;
         //check if move just made was a fold
         if (this.lastMoveParsed.move == 'Fold') {
@@ -381,10 +403,10 @@ const Game = function (name, host) {
         let count = 0;
         do {
           currTurnIndex = currTurnIndex - 1 < 0 ? this.players.length - 1 : currTurnIndex - 1;
-          count ++;
+          count++;
         } while (
           (this.players[currTurnIndex].getStatus() == 'Fold'
-          || this.players[currTurnIndex].allIn)
+            || this.players[currTurnIndex].allIn)
           && count < Object.keys(this.players).length * 2 // Avoid infinite loop, allow search twice on all players
         );
         this.players[currTurnIndex].setStatus('Their Turn');
@@ -875,9 +897,9 @@ const Game = function (name, host) {
             this.getCurrentRoundBets().map((a) =>
               a.player == player.username
                 ? {
-                    player: player.getUsername(),
-                    bet: player.getMoney() + currBet,
-                  }
+                  player: player.getUsername(),
+                  bet: player.getMoney() + currBet,
+                }
                 : a
             )
           );
