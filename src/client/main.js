@@ -16,8 +16,8 @@ socket.on('hostRoom', function (data) {
     if (data.players.length >= 11) {
       $('#hostModalContent').html(
         '<h5>Code:</h5><code>' +
-          data.code +
-          '</code><br /><h5>Warning: you have too many players in your room. Max is 11.</h5><h5>Players Currently in My Room</h5>'
+        data.code +
+        '</code><br /><h5>Warning: you have too many players in your room. Max is 11.</h5><h5>Players Currently in My Room</h5>'
       );
       $('#playersNames').html(
         data.players.map(function (p) {
@@ -27,8 +27,8 @@ socket.on('hostRoom', function (data) {
     } else if (data.players.length > 1) {
       $('#hostModalContent').html(
         '<h5>Code:</h5><code>' +
-          data.code +
-          '</code><br /><h5>Players Currently in My Room</h5>'
+        data.code +
+        '</code><br /><h5>Players Currently in My Room</h5>'
       );
       $('#playersNames').html(
         data.players.map(function (p) {
@@ -37,14 +37,14 @@ socket.on('hostRoom', function (data) {
       );
       $('#startGameArea').html(
         '<br /><button onclick=startGame(' +
-          data.code +
-          ') type="submit" class= "waves-effect waves-light green darken-3 white-text btn-flat">Start Game</button >'
+        data.code +
+        ') type="submit" class= "waves-effect waves-light green darken-3 white-text btn-flat">Start Game</button >'
       );
     } else {
       $('#hostModalContent').html(
         '<h5>Code:</h5><code>' +
-          data.code +
-          '</code><br /><h5>Players Currently in My Room</h5>'
+        data.code +
+        '</code><br /><h5>Players Currently in My Room</h5>'
       );
       $('#playersNames').html(
         data.players.map(function (p) {
@@ -75,13 +75,13 @@ socket.on('hostRoomUpdate', function (data) {
 socket.on('joinRoomUpdate', function (data) {
   $('#startGameAreaDisconnectSituation').html(
     '<br /><button onclick=startGame(' +
-      data.code +
-      ') type="submit" class= "waves-effect waves-light green darken-3 white-text btn-flat">Start Game</button >'
+    data.code +
+    ') type="submit" class= "waves-effect waves-light green darken-3 white-text btn-flat">Start Game</button >'
   );
   $('#joinModalContent').html(
     '<h5>' +
-      data.host +
-      "'s room</h5><hr /><h5>Players Currently in Room</h5><p>You are now a host of this game.</p>"
+    data.host +
+    "'s room</h5><hr /><h5>Players Currently in Room</h5><p>You are now a host of this game.</p>"
   );
 
   $('#playersNamesJoined').html(
@@ -102,8 +102,8 @@ socket.on('joinRoom', function (data) {
   } else {
     $('#joinModalContent').html(
       '<h5>' +
-        data.host +
-        "'s room</h5><hr /><h5>Players Currently in Room</h5><p>Please wait until your host starts the game. Leaving the page, refreshing, or going back will disconnect you from the game. </p>"
+      data.host +
+      "'s room</h5><hr /><h5>Players Currently in Room</h5><p>Please wait until your host starts the game. Leaving the page, refreshing, or going back will disconnect you from the game. </p>"
     );
     $('#playersNamesJoined').html(
       data.players.map(function (p) {
@@ -139,13 +139,13 @@ socket.on('rerender', function (data) {
   if (data.currBet == undefined) data.currBet = 0;
   $('#table-title').text(
     'Game ' +
-      data.round +
-      '    |    ' +
-      data.stage +
-      '    |    Current Top Bet: $' +
-      data.topBet +
-      '    |    Pot: $' +
-      data.pot
+    data.round +
+    '    |    ' +
+    data.stage +
+    '    |    Current Top Bet: $' +
+    data.topBet +
+    '    |    Pot: $' +
+    data.pot
   );
   $('#opponentCards').html(
     data.players.map(function (p) {
@@ -187,7 +187,7 @@ socket.on('gameBegin', function (data) {
 });
 
 function playNext() {
-  socket.emit('startNextRound', {});
+  setTimeout(function () { socket.emit('startNextRound', {}) }, 2000);
 }
 
 socket.on('reveal', function (data) {
@@ -204,9 +204,10 @@ socket.on('reveal', function (data) {
     }
   }
   $('#table-title').text('Hand Winner(s): ' + data.winners);
-  $('#playNext').html(
-    '<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Start Next Game</button>'
-  );
+  // $('#playNext').html(
+  //   '<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Start Next Game</button>'
+  // );
+  playNext();
   $('#blindStatus').text(data.hand);
   $('#usernamesMoney').text('$' + data.money);
   $('#opponentCards').html(
@@ -229,9 +230,10 @@ socket.on('endHand', function (data) {
   $('#usernameCall').hide();
   $('#usernameRaise').hide();
   $('#table-title').text(data.winner + ' takes the pot of $' + data.pot);
-  $('#playNext').html(
-    '<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Start Next Game</button>'
-  );
+  // $('#playNext').html(
+  // '<button onClick=playNext() id="playNextButton" class="btn white black-text menuButtons">Start Next Game</button>'
+  // );
+  playNext();
   $('#blindStatus').text('');
   if (data.folded == 'Fold') {
     $('#status').text('You Folded');
@@ -730,8 +732,8 @@ function updateBetDisplay() {
   if ($('#betRangeSlider').val() == $('#usernamesMoney').text()) {
     $('#betDisplay').html(
       '<h3 class="center-align">All-In $' +
-        $('#betRangeSlider').val() +
-        '</h36>'
+      $('#betRangeSlider').val() +
+      '</h36>'
     );
   } else {
     $('#betDisplay').html(
@@ -754,8 +756,8 @@ function updateBetModal() {
 function updateRaiseDisplay() {
   $('#raiseDisplay').html(
     '<h3 class="center-align">Raise top bet to $' +
-      $('#raiseRangeSlider').val() +
-      '</h3>'
+    $('#raiseRangeSlider').val() +
+    '</h3>'
   );
 }
 
