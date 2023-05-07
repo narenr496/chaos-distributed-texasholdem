@@ -137,7 +137,7 @@ io.on('connection', (socket) => {
     );
     if (game != undefined) {
       const player = game.findPlayer(socket.id);
-      game.disconnectPlayer(player);
+      game.disconnectPlayer(socket, player);
       if (game.players.length == 0) {
         if (this.rooms != undefined && this.rooms.length !== 0) {
           this.rooms = this.rooms.filter((a) => a != game);

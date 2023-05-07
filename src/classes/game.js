@@ -36,16 +36,14 @@ const Game = function (name, host) {
   this.autoMove = (socket) => {
     const currentTopBet = this.getCurrentTopBet();
     if (currentTopBet == 0 || !this.bigBlindWent) {
-      // this.check(socket);
-      console.log('this player would check');
+      this.check(socket);
     }
     else {
-      // this.fold(socket);
-      console.log('this player would fold');
+      this.fold(socket);
     }
   };
-  this.actionTimerCountdown = function () {
-    this.actionTimer = setTimeout(this.autoMove, this.secondsToPlay * 1000);
+  this.actionTimerCountdown = (socket) => {
+    this.actionTimer = setTimeout(this.autoMove, this.secondsToPlay * 1000, socket);
   };
 
   const constructor = (function () { })(this);
@@ -316,7 +314,7 @@ const Game = function (name, host) {
     this.roundData.bets.push([]);
   };
 
-  this.moveOntoNextPlayer = () => {
+  this.moveOntoNextPlayer = (socket) => {
     if (this.actionTimer != null) { clearTimeout(this.actionTimer) }
     let handOver = false;
     if (this.isStageComplete()) {
@@ -354,15 +352,15 @@ const Game = function (name, host) {
           this.community.push(this.deck.dealRandomCard());
           this.community.push(this.deck.dealRandomCard());
           this.updateStage();
-          this.actionTimerCountdown();
+          this.actionTimerCountdown(socket);
         } else if (this.roundData.bets.length == 2) {
           this.community.push(this.deck.dealRandomCard());
-          this.updateStage();
-          this.actionTimerCountdown();
+          this.updateStage(socket);
+          this.actionTimerCountdown(socket);
         } else if (this.roundData.bets.length == 3) {
           this.community.push(this.deck.dealRandomCard());
           this.updateStage();
-          this.actionTimerCountdown();
+          this.actionTimerCountdown(socket);
         } else if (this.roundData.bets.length == 4) {
           handOver = true;
           const roundResults = this.evaluateWinners();
@@ -386,7 +384,7 @@ const Game = function (name, host) {
         this.endHandAllFold(nonFolderPlayer.getUsername());
         handOver = true;
       } else {
-        this.actionTimerCountdown();
+        this.actionTimerCountdown(socket);
         let currTurnIndex = 0;
         //check if move just made was a fold
         if (this.lastMoveParsed.move == 'Fold') {
@@ -770,10 +768,10 @@ const Game = function (name, host) {
     return { socket: { id: 0 } };
   };
 
-  this.disconnectPlayer = (player) => {
+  this.disconnectPlayer = (socket, player) => {
     this.disconnectedPlayers.push(player);
     if (player.getStatus() == 'Their Turn') {
-      this.moveOntoNextPlayer();
+      this.moveOntoNextPlayer(socket);
     }
     this.players = this.players.filter((a) => a !== player);
     if (player.getUsername() == this.host) {
@@ -837,7 +835,7 @@ const Game = function (name, host) {
       });
     }
     this.lastMoveParsed = { move: 'Fold', player: player };
-    this.moveOntoNextPlayer();
+    this.moveOntoNextPlayer(socket);
     return true;
   };
 
@@ -886,7 +884,7 @@ const Game = function (name, host) {
           player.money = player.money - topBet;
         }
       }
-      this.moveOntoNextPlayer();
+      this.moveOntoNextPlayer(socket);
       return true;
     } else {
       if (
@@ -905,7 +903,7 @@ const Game = function (name, host) {
           );
           player.money = 0;
           player.allIn = true;
-          this.moveOntoNextPlayer();
+          this.moveOntoNextPlayer(socket);
         } else {
           this.setCurrentRoundBets(
             this.getCurrentRoundBets().map((a) =>
@@ -915,7 +913,7 @@ const Game = function (name, host) {
             )
           );
           player.money = player.money - (topBet - currBet);
-          this.moveOntoNextPlayer();
+          this.moveOntoNextPlayer(socket);
         }
         return true;
       } else {
@@ -940,7 +938,7 @@ const Game = function (name, host) {
         });
         player.money = player.money - bet;
         if (player.money == 0) player.allIn = true;
-        this.moveOntoNextPlayer();
+        this.moveOntoNextPlayer(socket);
         return true;
       }
     }
@@ -971,7 +969,7 @@ const Game = function (name, host) {
         bet: currBet,
       });
     }
-    this.moveOntoNextPlayer();
+    this.moveOntoNextPlayer(socket);
     return true;
   };
 
@@ -1007,7 +1005,7 @@ const Game = function (name, host) {
       }
       player.money -= moneyToRemove;
       if (player.money == 0) player.allIn = true;
-      this.moveOntoNextPlayer();
+      this.moveOntoNextPlayer(socket);
       return true;
     }
   };
